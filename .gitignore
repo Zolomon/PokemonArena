@@ -5,7 +5,9 @@ cabal-dev
 *.chi
 *.chs.h
 .virtualenv
+<<<<<<< HEAD
 .hpc
+=======
 .hsenv
 .cabal-sandbox/
 cabal.sandbox.config
@@ -14,3 +16,5 @@ cabal.config
 *.hp
 *.aux
 :wq
+=======
+>>>>>>> d6ecda2a90705150c3d917a79e8631f7be8d21cb
