@@ -4,22 +4,24 @@
 name:                pokemonarena
 version:             0.1.0.0
 synopsis:            A multiplayer Pokemon Arena Battle game
--- description:         
+description:         A multiplayer Pokemon Arena Battle game
 homepage:            http://github.com/Zolomon/pokemonarena
 license:             MIT
 license-file:        LICENSE
 author:              Bengt Ericsson
 maintainer:          zolomon@gmail.com
--- copyright:           
+copyright:           2014, Bengt Ericsson
 category:            Game
 build-type:          Simple
 -- extra-source-files:  
 cabal-version:       >=1.10
 
 executable pokemonarena
+  ghc-options:         -Wall
+  hs-source-dirs:      src
   main-is:             Main.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.5 && <4.6
-  -- hs-source-dirs:      
+  build-depends:       base >=4.5 && <4.6,
+                       network
   default-language:    Haskell2010
