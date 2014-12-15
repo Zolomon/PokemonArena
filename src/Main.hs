@@ -1,6 +1,8 @@
 module Main where
 import System.Environment (getArgs)
-import Control.Monad (unless)
+--import Control.Monad(unless)
+import Server (run)
+
 main :: IO ()
 main = do
   args <- getArgs
@@ -12,10 +14,11 @@ main = do
 
 validate :: [String] -> IO ()
 validate [] = error "Not enough args, see --help"
-validate (x:xs) = case x of
-                   "server" -> unless (length xs == 1) $ error "Format: port"
-                   "client" -> unless (length xs == 2) $ error "Format: hostname port"
-                   _ -> error "Unknown command"
+validate (x:xs)
+  | x=="server" && length xs /= 1 = error "Format: server <port>"
+  | x=="client" && length xs /= 2 = error "Format: client <hostname> <port>"
+  | otherwise = return ()
+
 
 runServer :: String -> IO ()
-runServer =
+runServer = Server.run

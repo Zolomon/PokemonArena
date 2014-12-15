@@ -1,21 +1,28 @@
+module Server where
+
 import Network (listenOn, withSocketsDo, accept, PortID(..), Socket)
---import System (getArgs)
-import System.IO (hSetBuffering, hGetLine, hPutStrLn, BufferMode(..), Handle)
+import System.IO (hSetBuffering, hGetLine, hPutStrLn, hPrint, BufferMode(..), Handle)
 import Control.Concurrent (forkIO)
 
-main :: IO ()
-main = withSocketsDo $ do
-  args <- getArgs
-  let port = fromIntegral (read $ head args :: Int)
-  sock <- listenOn $ PortNumber port
-  putStrLn $ "Listening on " ++ (head args)
+-- main :: IO ()
+-- main = do
+--   args <- getArgs
+--   let port = (read $ head args :: Int)
+--   run show port
+
+--run :: PortID -> IO ()
+run :: String -> IO ()
+run port = withSocketsDo $ do
+  let p = fromIntegral $ (read port :: Int)
+  sock <- listenOn $ (PortNumber p)
+  putStrLn $ "Listening on " ++ show p
   sockHandler sock
 
 sockHandler :: Socket -> IO ()
 sockHandler sock = do
   (handle, _, _) <- accept sock
   hSetBuffering handle NoBuffering
-  forkIO $ commandProcessor handle
+  _ <- forkIO $ commandProcessor handle
   sockHandler sock
 
 commandProcessor :: Handle -> IO ()
@@ -28,10 +35,10 @@ commandProcessor handle = do
    _ -> hPutStrLn handle "Unknown command"
   commandProcessor handle
 
-echoCommand :: Handle -> IO ()
+echoCommand :: Handle -> [String] -> IO ()
 echoCommand handle cmd = do
   hPutStrLn handle (unwords $ tail cmd)
 
-addCommand :: Handle -> IO ()
-addCommand handle cmd = do
-  hPutStrLn handle $ show $ (read $ cmd !! 1) + (read $ cmd !! 2)
+addCommand :: Handle -> [String] -> IO ()
+addCommand handle cmd =
+  hPrint handle $ (read $ cmd !! 1 :: Int) + (read $ cmd !! 2 :: Int)
