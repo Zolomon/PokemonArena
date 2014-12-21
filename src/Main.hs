@@ -1,7 +1,10 @@
 module Main where
 import System.Environment (getArgs)
---import Control.Monad(unless)
+import Control.Concurrent (newMVar)
+import qualified Data.Map as Map
+
 import Server (run)
+--import DataTypes
 
 main :: IO ()
 main = do
@@ -21,4 +24,6 @@ validate (x:xs)
 
 
 runServer :: String -> IO ()
-runServer = Server.run
+runServer x = do
+  connections <- newMVar Map.empty
+  Server.run x connections

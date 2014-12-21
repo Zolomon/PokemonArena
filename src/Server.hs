@@ -1,39 +1,49 @@
 module Server where
 
-import Network (listenOn, withSocketsDo, accept, PortID(..), Socket)
+import Network (listenOn, withSocketsDo, accept, PortID(..), Socket, HostName, PortNumber)
 import System.IO (hSetBuffering, hGetLine, hPutStrLn, hPrint, BufferMode(..), Handle)
-import Control.Concurrent (forkIO)
+import Control.Concurrent --(forkIO, newEmptyMVar, MVar)
+import qualified Data.Map as Map
 
--- main :: IO ()
--- main = do
---   args <- getArgs
---   let port = (read $ head args :: Int)
---   run show port
+import DataTypes
 
---run :: PortID -> IO ()
-run :: String -> IO ()
-run port = withSocketsDo $ do
+run :: String -> MVar Connections -> IO ()
+run port connections = withSocketsDo $ do
   let p = fromIntegral $ (read port :: Int)
   sock <- listenOn $ (PortNumber p)
   putStrLn $ "Listening on " ++ show p
-  sockHandler sock
+  sockHandler sock connections
 
-sockHandler :: Socket -> IO ()
-sockHandler sock = do
-  (handle, _, _) <- accept sock
+sockHandler :: Socket -> MVar Connections -> IO ()
+sockHandler sock connections = do
+  (handle, host, port) <- accept sock
   hSetBuffering handle NoBuffering
-  _ <- forkIO $ commandProcessor handle
-  sockHandler sock
+  _ <- forkIO $ do
+    conns <- takeMVar connections -- Add new connection
+    putMVar connections (Map.insert (host, port) (PlayerState Login "", Account "" "" "", handle) conns)
+    commandProcessor handle (host, port) connections
+  sockHandler sock connections
 
-commandProcessor :: Handle -> IO ()
-commandProcessor handle = do
+commandProcessor :: Handle -> (HostName, PortNumber) -> MVar Connections -> IO ()
+commandProcessor handle con connections = do
   line <- hGetLine handle
   let cmd = words line
+  conns <- takeMVar connections
+  let updatedState = updateLastCommand conns con (head cmd)
+  putMVar connections updatedState
+  putStrLn (show updatedState)
   case (head cmd) of
    ("echo") -> echoCommand handle cmd
    ("add") -> addCommand handle cmd
    _ -> hPutStrLn handle "Unknown command"
-  commandProcessor handle
+  commandProcessor handle con connections
+
+updateLastCommand :: Connections -> Connection -> String -> Connections
+updateLastCommand conns con cmd =
+  Map.adjust (\(playerstate, a, h) -> (PlayerState { currentRoom=(currentRoom playerstate)
+                                                           , lastCommand=cmd},
+                                               a,
+                                               h)) con conns
 
 echoCommand :: Handle -> [String] -> IO ()
 echoCommand handle cmd = do
