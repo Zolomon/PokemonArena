@@ -9,7 +9,14 @@ data Account = Account { username :: String
                        , email :: String
                        } deriving (Eq, Show, Read, Ord)
 
-data RoomState = Login | Town | Wilderness | Arena | Logout
+data RoomState = Login
+               | LoginLogin
+               | LoginNewAccount
+               | LoginNewAccountEmail
+               | LoginNewAccountPassword
+               | LoginNewAccountPasswordVerify
+               | LoginNewAccountComplete
+               | Town | Wilderness | Arena | Logout
                deriving (Eq, Show, Read, Bounded, Enum, Ord)
 
 data PlayerState = PlayerState { currentRoom :: RoomState
